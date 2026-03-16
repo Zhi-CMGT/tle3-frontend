@@ -52,19 +52,22 @@ function PersonalPage() {
     useEffect(() => {
         const fetchPersonalData = async () => {
             try {
+                const token = localStorage.getItem('token');
+                const userId = localStorage.getItem('userId');
+
                 const response = await fetch(
-                    `http://145.24.237.215:8000/api/user/69b157e7c5851af11eca54de`,
+                    `http://145.24.237.215:8000/api/user/${userId}`,
                     {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            Accept: 'application/json',
+                            'Authorization': `Bearer ${token}`,
                         },
                     }
                 );
                 if (!response.ok) throw new Error('Netwerk response was niet ok!');
                 const data = await response.json();
-                console.log(data);
+                
                 setPersonalData(data.user);
             } catch (error) {
                 setError(error.message);

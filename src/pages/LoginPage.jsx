@@ -28,12 +28,12 @@ const LoginPage = () => {
 
         try {
             const response = await fetch(
-                ' http://145.24.237.215:8000/api/user/login',
+                'http://145.24.237.215:8000/api/user/login',
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        Accept: 'application/json',
+                        'x-api-key': api - key
                     },
                     body: JSON.stringify(formData),
                 }
@@ -42,12 +42,13 @@ const LoginPage = () => {
             if (!response.ok) {
                 throw new Error('Inloggen mislukt. Controleer je gegevens.');
             }
-            //
-            // const data = await response.json();
-            // localStorage.setItem('token', data.token);
+
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userId', data.user._id);
 
             alert('Succesvol ingelogd!');
-            navigate('/');
+            navigate('/persoonlijke-pagina');
         } catch (error) {
             console.error('Login error:', error);
             alert(error.message);
