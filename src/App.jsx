@@ -6,7 +6,6 @@ import WMOHelp from "./pages/WMOHelp.jsx";
 import WMOForm from "./pages/WMOForm.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import PersonalPage from "./pages/PersonalPage.jsx";
-import PersonalizedHomePage from "./pages/PersonalizedHomePage.jsx";
 
 
 const router = createBrowserRouter([
@@ -16,10 +15,6 @@ const router = createBrowserRouter([
             {
                 path: "/",
                 element: <HomePage/>
-            },
-            {
-                path: "/Personaliseerde-pagina",
-                element: <PersonalizedHomePage/>
             },
             {
                 path: "/login",
