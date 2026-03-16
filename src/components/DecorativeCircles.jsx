@@ -2,7 +2,7 @@ export default function DecorativeCircles() {
     return (
         <>
             <div
-                className="fixed z-0"
+                className="absolute z-0"
                 style={{
                     top: '12vh',
                     left: '10vw',
@@ -14,7 +14,7 @@ export default function DecorativeCircles() {
                 }}
             ></div>
             <div
-                className="fixed z-0"
+                className="absolute z-0"
                 style={{
                     top: '20vh',
                     right: '12vw',
@@ -26,7 +26,7 @@ export default function DecorativeCircles() {
                 }}
             ></div>
             <div
-                className="fixed z-0"
+                className="absolute z-0"
                 style={{
                     bottom: '22vh',
                     left: '18vw',
@@ -38,7 +38,7 @@ export default function DecorativeCircles() {
                 }}
             ></div>
             <div
-                className="fixed z-0"
+                className="absolute z-0"
                 style={{
                     bottom: '14vh',
                     right: '2vw',
@@ -50,7 +50,7 @@ export default function DecorativeCircles() {
                 }}
             ></div>
             <div
-                className="fixed z-0"
+                className="absolute z-0"
                 style={{
                     top: '48vh',
                     left: '2vw',
@@ -62,7 +62,7 @@ export default function DecorativeCircles() {
                 }}
             ></div>
             <div
-                className="fixed z-0"
+                className="absolute z-0"
                 style={{
                     top: '50vh',
                     right: '32vw',
