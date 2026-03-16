@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router';
 import DecorativeCircles from '../components/DecorativeCircles.jsx';
+import Footer from "../components/Footer.jsx";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -57,7 +58,7 @@ const LoginPage = () => {
     return (
         <div className="flex items-center justify-center min-h-screen py-12">
             <DecorativeCircles/>
-            <div className="bg-white border-2 border-blue-700 rounded-lg p-8 w-140 shadow-sm z-10">
+            <div className="bg-white border-2 border-[#004A99] rounded-lg p-8 w-140 shadow-sm z-10">
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <div className="bg-blue-50 border border-gray-300 rounded px-3 py-2">
@@ -103,7 +104,7 @@ const LoginPage = () => {
 
                     <div className="flex justify-center">
                         <button
-                            className="bg-blue-700 hover:bg-blue-800 text-white text-lg font-semibold px-10 py-2 rounded transition-colors"
+                            className="bg-[#004A99] hover:bg-blue-400 text-white text-lg font-semibold px-10 py-2 rounded transition-colors"
                             type="submit"
                         >
                             Login
