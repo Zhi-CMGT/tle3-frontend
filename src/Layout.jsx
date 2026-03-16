@@ -1,5 +1,6 @@
 import Nav from "./components/Nav.jsx";
 import {Outlet} from "react-router";
+import Footer from "./components/Footer.jsx";
 
 function Layout() {
     return (
@@ -10,6 +11,9 @@ function Layout() {
             <main>
                 <Outlet/>
             </main>
+            <footer>
+                <Footer/>
+            </footer>
         </div>
     )
 }
