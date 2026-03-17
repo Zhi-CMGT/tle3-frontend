@@ -1,4 +1,4 @@
-import {createBrowserRouter, RouterProvider} from "react-router";
+import {createBrowserRouter, RouterProvider, Navigate} from "react-router";
 import LoginPage from "./pages/LoginPage.jsx";
 import Layout from "./Layout.jsx";
 import HomePage from "./pages/HomePage.jsx";
@@ -9,6 +9,13 @@ import PersonalPage from "./pages/PersonalPage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import EditPersonalPage from "./pages/EditPersonalPage.jsx";
 
+function ProtectedRoute({children}) {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+        return <Navigate to="/login" replace/>;
+    }
+    return <>{children}</>;
+}
 
 const router = createBrowserRouter([
     {
@@ -29,7 +36,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/WMO-formulieren",
-                element: <WMOForm/>
+                element: (
+                    <ProtectedRoute>
+                        <WMOForm/>
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "/WMO-help",

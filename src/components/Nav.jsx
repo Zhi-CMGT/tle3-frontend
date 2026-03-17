@@ -22,7 +22,7 @@ function Nav() {
                             Home
                         </Link>
 
-                        <Link to="https://www.zuidplas.nl" className="hover:text-blue-700">
+                        <Link to="/login" className="hover:text-blue-700">
                             Inloggen bij mijn Gemeente
                         </Link>
 

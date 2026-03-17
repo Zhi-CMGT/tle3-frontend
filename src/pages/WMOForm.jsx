@@ -41,10 +41,12 @@ export default function MultiStepForm() {
     useEffect(() => {
         async function fetchInquiryTypes() {
             try {
-                const response = await fetch(`http://145.24.237.215:8000/api/inquiry-types`, {
+                const response = await fetch(`http://145.24.237.215:8000/v2/api/inquiry-types`, {
                     method: "GET",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        'x-api-key': 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3',
+                        'Accept': 'application/json',
                     }
                 });
 
