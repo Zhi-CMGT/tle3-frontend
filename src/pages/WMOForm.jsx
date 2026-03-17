@@ -41,7 +41,7 @@ export default function MultiStepForm() {
     useEffect(() => {
         async function fetchInquiryTypes() {
             try {
-                const response = await fetch(`http://145.24.237.144:8000/v1/api/inquiry-types`, {
+                const response = await fetch(`http://145.24.237.215:8000/v2/api/inquiry-types`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
