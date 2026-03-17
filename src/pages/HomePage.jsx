@@ -275,11 +275,14 @@ const CategoryCard = ({category}) => {
 
 const HomePage = () => {
     const [user, setUser] = useState(null);
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (!token) return;
+        if (!token) {
+            setLoading(false);
+            return;
+        }
 
         const fetchUser = async () => {
             try {
@@ -296,6 +299,8 @@ const HomePage = () => {
             } catch {
                 localStorage.removeItem("token");
                 setUser(null);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -329,7 +334,7 @@ const HomePage = () => {
                     <SearchBar/>
 
                     {/* Relevant voor jou — alleen zichtbaar als ingelogd */}
-                    {user && <RelevantSection user={user}/>}
+                    {!loading && user && <RelevantSection user={user}/>}
                 </div>
             </header>
 
