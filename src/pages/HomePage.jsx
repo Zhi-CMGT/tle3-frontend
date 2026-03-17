@@ -259,7 +259,6 @@ const CategoryCard = ({category}) => {
                 ))}
             </div>
 
-            {/* Foto onderaan */}
             <div className="h-36 overflow-hidden">
                 <img
                     src={category.image}
@@ -283,10 +282,10 @@ const HomePage = () => {
 
         const fetchUser = async () => {
             try {
-                const res = await fetch(`${API_BASE}/user`, {
+                const res = await fetch(`http://145.24.237.215:8000/v1/api/user`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        "x-api-key": API_KEY,
+                        "x-api-key": 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3',
                         "Content-Type": "application/json",
                     },
                 });

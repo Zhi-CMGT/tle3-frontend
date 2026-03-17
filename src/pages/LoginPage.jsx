@@ -46,7 +46,7 @@ const LoginPage = () => {
 
             const data = await response.json();
             localStorage.setItem('token', data.token);
-            localStorage.setItem('userId', data.user._id);
+            localStorage.setItem('userId', data.user.id);
 
             alert('Succesvol ingelogd!');
             navigate('/persoonlijke-pagina');

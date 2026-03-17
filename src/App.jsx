@@ -7,6 +7,7 @@ import WMOForm from "./pages/WMOForm.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import PersonalPage from "./pages/PersonalPage.jsx";
 import NotFound from "./components/NotFound.jsx";
+import EditPersonalPage from "./pages/EditPersonalPage.jsx";
 
 
 const router = createBrowserRouter([
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
                 element: <LoginPage/>
             },
             {
+                path: "/registreren",
+                element: <RegisterPage/>
+            },
+            {
                 path: "/WMO-formulieren",
                 element: <WMOForm/>
             },
@@ -37,6 +42,14 @@ const router = createBrowserRouter([
             {
                 path: "/Persoonlijke-pagina",
                 element: <PersonalPage/>
+            },
+            {
+                path: "/Bewerken-Persoonlijke-pagina",
+                element: <EditPersonalPage/>
+            },
+            {
+                path: "*",
+                element: <NotFound/>
             },
 
         ]
