@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router';
 import DecorativeCircles from '../components/DecorativeCircles.jsx';
-import Footer from "../components/Footer.jsx";
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -28,13 +27,14 @@ const LoginPage = () => {
         }
 
         try {
-            const response = await fetch(
-                'http://145.24.237.215:8000/api/user/login',
+            const response = await fetch('http://145.24.237.215:8000/v1/api/user/login',
+                // `${process.env.BASE_URI}user/login`,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key': api - key
+                        'accept': 'application/json',
+                        'x-api-key': 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3'
                     },
                     body: JSON.stringify(formData),
                 }
