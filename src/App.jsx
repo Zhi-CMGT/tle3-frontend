@@ -6,11 +6,13 @@ import WMOHelp from "./pages/WMOHelp.jsx";
 import WMOForm from "./pages/WMOForm.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import PersonalPage from "./pages/PersonalPage.jsx";
+import NotFound from "./components/NotFound.jsx";
 
 
 const router = createBrowserRouter([
     {
         element: <Layout/>,
+        errorElement: <NotFound/>,
         children: [
             {
                 path: "/",
