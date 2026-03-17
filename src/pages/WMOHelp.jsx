@@ -196,11 +196,6 @@ function WMOHelp() {
                 </div>
             </section>
 
-            <section className="bg-white">
-                <div className="mx-auto max-w-3xl px-6 py-12">
-                    <Accordion items={accordionItems}/>
-                </div>
-            </section>
         </main>
     );
 }
