@@ -1,58 +1,6 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect, useMemo, useRef} from "react";
 import {useNavigate} from "react-router";
 import headerBg from "../assets/react.svg";
-import omgevingImg from "../assets/react.svg";
-import wonenImg from "../assets/react.svg";
-import levenImg from "../assets/react.svg";
-import zorgImg from "../assets/react.svg";
-
-// --- DATA ---
-const categories = [
-    {
-        id: 1,
-        name: "Omgeving",
-        slug: "omgeving",
-        image: omgevingImg,
-        subcategories: [
-            {name: "Parkeren", slug: "parkeren"},
-            {name: "Afval", slug: "afval"},
-            {name: "Natuur", slug: "natuur"},
-        ],
-    },
-    {
-        id: 2,
-        name: "Wonen",
-        slug: "wonen",
-        image: wonenImg,
-        subcategories: [
-            {name: "Verhuizen", slug: "verhuizen"},
-            {name: "Belasting", slug: "belasting"},
-            {name: "Verbouwen", slug: "verbouwen"},
-        ],
-    },
-    {
-        id: 3,
-        name: "Leven",
-        slug: "leven",
-        image: levenImg,
-        subcategories: [
-            {name: "Trouwen", slug: "trouwen"},
-            {name: "Scheiden", slug: "scheiden"},
-            {name: "Geboorte", slug: "geboorte"},
-        ],
-    },
-    {
-        id: 4,
-        name: "Zorg",
-        slug: "zorg",
-        image: zorgImg,
-        subcategories: [
-            {name: "WMO", slug: "wmo"},
-            {name: "Vluchtelingen", slug: "vluchtelingen"},
-            {name: "Tijdelijke ondersteuning", slug: "tijdelijke-ondersteuning"},
-        ],
-    },
-];
 
 const mostSearched = [
     {name: "Paspoort aanvragen", slug: "paspoort-aanvragen", category: "Leven"},
@@ -61,22 +9,7 @@ const mostSearched = [
     {name: "Verhuizing doorgeven", slug: "verhuizen", category: "Wonen"},
 ];
 
-// Flatten all subcategories for search
-const allItems = categories.flatMap((cat) =>
-    cat.subcategories.map((sub) => ({
-        ...sub,
-        category: cat.name,
-        categorySlug: cat.slug,
-    }))
-);
-
-// --- API CONFIG ---
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-const API_KEY = import.meta.env.VITE_API_KEY || "";
-
-// --- COMPONENTS ---
-
-const SearchBar = ({onResults}) => {
+const SearchBar = ({allItems}) => {
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState([]);
     const [open, setOpen] = useState(false);
@@ -123,7 +56,7 @@ const SearchBar = ({onResults}) => {
     };
 
     return (
-        <div ref={wrapperRef} className="relative w-full max-w-2xl">
+        <div ref={wrapperRef} className="relative w-full max-w-2xl mt-8">
             <form onSubmit={handleSubmit}>
                 <div
                     className="flex items-center bg-white rounded-2xl shadow-2xl overflow-hidden border border-white/20">
@@ -146,7 +79,7 @@ const SearchBar = ({onResults}) => {
 
             {open && suggestions.length > 0 && (
                 <div
-                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden text-left">
                     {suggestions.map((item) => (
                         <button
                             key={`${item.categorySlug}-${item.slug}`}
@@ -173,13 +106,11 @@ const SearchBar = ({onResults}) => {
     );
 };
 
-const RelevantSection = ({user}) => {
+const RelevantSection = ({user, allItems}) => {
     const navigate = useNavigate();
-    // In a real app, these would come from user profile / API
     const relevantItems = allItems.filter((item) =>
         user?.relevantSlugs?.includes(item.slug)
-    ) || allItems.slice(0, 3);
-
+    );
     const items = relevantItems.length > 0 ? relevantItems : allItems.slice(0, 3);
 
     return (
@@ -187,7 +118,7 @@ const RelevantSection = ({user}) => {
             <p className="text-white/80 text-xs font-semibold uppercase tracking-widest mb-2">
                 Relevant voor jou
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 justify-center">
                 {items.map((item) => (
                     <button
                         key={item.slug}
@@ -236,18 +167,15 @@ const CategoryCard = ({category}) => {
     const navigate = useNavigate();
     return (
         <div
-            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1 border border-gray-100">
-
-            {/* Titel */}
+            className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1 border border-gray-100 flex flex-col h-full">
             <div className="px-5 pt-5 pb-2">
                 <h3 className="text-base font-bold text-gray-900 text-center">
                     {category.name}
                 </h3>
             </div>
 
-            {/* Subcategorieën */}
-            <div className="px-5 pb-4 flex flex-col gap-0.5">
-                {category.subcategories.map((sub) => (
+            <div className="px-5 pb-4 flex flex-col gap-0.5 flex-grow">
+                {(category.subcategories ?? []).map((sub) => (
                     <button
                         key={sub.slug}
                         onClick={() => navigate(`/${category.slug}/${sub.slug}`)}
@@ -259,50 +187,99 @@ const CategoryCard = ({category}) => {
                 ))}
             </div>
 
-            <div className="h-36 overflow-hidden">
-                <img
-                    src={category.image}
-                    alt={category.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+            <div className="h-36 overflow-hidden bg-blue-50 mt-auto">
+                {category.image ? (
+                    <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl select-none text-blue-200">
+                        📁
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
+const CategoryCardSkeleton = () => (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+        <div className="px-5 pt-5 pb-2">
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"/>
+        </div>
+        <div className="px-5 pb-4 flex flex-col gap-2">
+            {[1, 2, 3].map((i) => (
+                <div key={i} className="h-3 bg-gray-100 rounded w-3/4"/>
+            ))}
+        </div>
+        <div className="h-36 bg-gray-100"/>
+    </div>
+);
+
 // --- MAIN PAGE ---
 
 const HomePage = () => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [userLoading, setUserLoading] = useState(true);
+
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
+    const [categoriesError, setCategoriesError] = useState(null);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_BASE_URI}categories`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "x-api-key": import.meta.env.VITE_API_KEY,
+                        }
+                    });
+
+                if (!response.ok) throw new Error(`Fout: ${response.status}`);
+                const data = await response.json();
+                setCategories(data);
+                console.log(data);
+            } catch (err) {
+                console.error("Categorieën ophalen mislukt:", err);
+                setCategoriesError(err.message);
+            } finally {
+                setCategoriesLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("userId");
         if (!token) {
-            setLoading(false);
+            setUserLoading(false);
             return;
         }
 
         const fetchUser = async () => {
             try {
-                // Prefer v2 single-user endpoint when we have a userId; fallback to v1 list route otherwise
                 const url = userId
-                    ? `http://145.24.237.215:8000/v2/api/user/${userId}`
-                    : `http://145.24.237.215:8000/v1/api/user`;
+                    ? `${import.meta.env.VITE_BASE_URI}user/${userId}`
+                    : `${import.meta.env.VITE_BASE_URI}user`;
 
                 const res = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        "x-api-key": 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3',
+                        "x-api-key": import.meta.env.VITE_API_KEY,
                         "Content-Type": "application/json",
                         "Accept": "application/json",
                     },
                 });
 
                 if (!res.ok) {
-                    // Only clear token on explicit unauthorized errors. Other status codes may indicate
-                    // a bad request or server issue — don't wipe the token blindly.
                     if (res.status === 401) {
                         localStorage.removeItem("token");
                         setUser(null);
@@ -311,35 +288,39 @@ const HomePage = () => {
                 }
 
                 const data = await res.json();
-                // v2 returns { user }, v1 might return other shape — prefer data.user if present
                 setUser(data.user || data);
             } catch (err) {
-                // don't aggressively remove token here; we've handled 401 above
                 console.error('Failed to fetch user in HomePage:', err);
                 setUser(null);
             } finally {
-                setLoading(false);
+                setUserLoading(false);
             }
         };
 
         fetchUser();
     }, []);
 
+    const allItems = useMemo(
+        () =>
+            categories.flatMap((cat) =>
+                (cat.subcategories ?? []).map((sub) => ({
+                    ...sub,
+                    category: cat.name,
+                    categorySlug: cat.slug ?? cat.name.toLowerCase().replace(/\s+/g, "-"),
+                }))
+            ),
+        [categories]
+    );
+
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
-
-            {/* ── HEADER ── */}
             <header className="relative overflow-hidden">
-                {/* Background image with overlay */}
                 <div
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{
-                        backgroundImage: `url(${headerBg})`,
-                    }}
+                    style={{backgroundImage: `url(${headerBg})`}}
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-blue-800/70 to-indigo-900/80"/>
 
-                {/* Hero content */}
                 <div
                     className="relative z-10 max-w-6xl mx-auto px-6 pt-12 pb-20 flex flex-col items-center text-center">
                     <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight">
@@ -349,17 +330,16 @@ const HomePage = () => {
                         Vind snel wat u nodig heeft via gemeente diensten en informatie.
                     </p>
 
-                    <SearchBar/>
+                    <SearchBar allItems={allItems}/>
 
-                    {/* Relevant voor jou — alleen zichtbaar als ingelogd */}
-                    {!loading && user && <RelevantSection user={user}/>}
+                    {!userLoading && user && (
+                        <RelevantSection user={user} allItems={allItems}/>
+                    )}
                 </div>
             </header>
 
-            {/* ── MEEST GEZOCHT STRIP ── */}
             <MostSearchedStrip/>
 
-            {/* ── CATEGORIE BLOKKEN ── */}
             <main className="max-w-6xl mx-auto px-6 py-14">
                 <div className="mb-10 text-center">
                     <h2 className="text-3xl font-black text-gray-900 tracking-tight">
@@ -370,10 +350,19 @@ const HomePage = () => {
                     </p>
                 </div>
 
+                {categoriesError && (
+                    <p className="text-center py-10 text-red-500">
+                        Categorieën konden niet worden geladen. Probeer het later opnieuw.
+                    </p>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {categories.map((cat) => (
-                        <CategoryCard key={cat.id} category={cat}/>
-                    ))}
+                    {categoriesLoading
+                        ? [1, 2, 3, 4].map((i) => <CategoryCardSkeleton key={i}/>)
+                        : categories.map((cat) => (
+                            <CategoryCard key={cat.id} category={cat}/>
+                        ))
+                    }
                 </div>
             </main>
         </div>

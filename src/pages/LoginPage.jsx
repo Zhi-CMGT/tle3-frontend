@@ -8,6 +8,8 @@ const LoginPage = () => {
         email: '',
         password: '',
     });
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
     const {login} = useAuth();
@@ -18,29 +20,30 @@ const LoginPage = () => {
             ...formData,
             [name]: value,
         });
+        if (error) setError('');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.email || !formData.password) {
-            alert('E-mail en wachtwoord zijn verplicht!');
+            setError('E-mail en wachtwoord zijn verplicht!');
             return;
         }
 
+        setIsLoading(true);
+        setError('');
+
         try {
-            const response = await fetch('http://145.24.237.215:8000/v1/api/user/login',
-                // `${process.env.BASE_URI}user/login`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'x-api-key': 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3'
-                    },
-                    body: JSON.stringify(formData),
-                }
-            );
+            const response = await fetch(`${import.meta.env.VITE_BASE_URI}user/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'x-api-key': import.meta.env.VITE_API_KEY,
+                },
+                body: JSON.stringify(formData),
+            });
 
             if (!response.ok) {
                 throw new Error('Inloggen mislukt. Controleer je gegevens.');
@@ -51,11 +54,12 @@ const LoginPage = () => {
             // Use AuthContext login so state is consistent
             login({token: data.token, userId: data.user.id});
 
-            alert('Succesvol ingelogd!');
             navigate('/persoonlijke-pagina');
-        } catch (error) {
-            console.error('Login error:', error);
-            alert(error.message);
+        } catch (err) {
+            console.error('Login error:', err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -63,13 +67,24 @@ const LoginPage = () => {
         <div className="flex items-center justify-center min-h-screen py-12">
             <DecorativeCircles/>
             <div className="bg-white border-2 border-[#004A99] rounded-lg p-8 w-140 shadow-sm z-10">
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
+
+                    {error && (
+                        <div className="mb-4 px-3 py-2 bg-red-50 border border-red-300 rounded text-red-600 text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="mb-4">
                         <div className="bg-blue-50 border border-gray-300 rounded px-3 py-2">
-                            <label className="text-lg font-semibold text-gray-700">
+                            <label
+                                htmlFor="email"
+                                className="text-lg font-semibold text-gray-700"
+                            >
                                 Email:
                             </label>
                             <input
+                                id="email"
                                 type="email"
                                 className="w-full bg-transparent outline-none text-lg text-gray-600 mt-1"
                                 placeholder="klaas123@hotmail.com"
@@ -77,22 +92,28 @@ const LoginPage = () => {
                                 value={formData.email}
                                 onChange={handleInputChange}
                                 required
+                                autoComplete="email"
                             />
                         </div>
                     </div>
 
                     <div className="mb-3">
                         <div className="bg-blue-50 border border-gray-300 rounded px-3 py-2">
-                            <label className="text-lg font-semibold text-gray-700">
+                            <label
+                                htmlFor="password"
+                                className="text-lg font-semibold text-gray-700"
+                            >
                                 Password:
                             </label>
                             <input
+                                id="password"
                                 type="password"
                                 className="w-full bg-transparent outline-none text-lg text-gray-600 mt-1"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
                                 required
+                                autoComplete="current-password"
                             />
                         </div>
                     </div>
@@ -108,10 +129,11 @@ const LoginPage = () => {
 
                     <div className="flex justify-center">
                         <button
-                            className="bg-[#004A99] hover:bg-blue-400 text-white text-lg font-semibold px-10 py-2 rounded transition-colors"
+                            className="bg-[#004A99] hover:bg-blue-400 text-white text-lg font-semibold px-10 py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             type="submit"
+                            disabled={isLoading}
                         >
-                            Login
+                            {isLoading ? 'Bezig...' : 'Login'}
                         </button>
                     </div>
                 </form>
