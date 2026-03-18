@@ -51,7 +51,6 @@ const LoginPage = () => {
 
             const data = await response.json();
 
-            // Use AuthContext login so state is consistent
             login({token: data.token, userId: data.user.id});
 
             navigate('/persoonlijke-pagina');

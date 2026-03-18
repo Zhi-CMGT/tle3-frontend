@@ -18,12 +18,10 @@ function ProtectedRoute({children}) {
     return <>{children}</>;
 }
 
-// PublicRoute: redirect authenticated users away from public pages (like /login)
 function PublicRoute({children}) {
     const {isAuthenticated} = useAuth();
     if (isAuthenticated) {
-        // If user is logged in, send to their personal page (or home)
-        return <Navigate to="/Persoonlijke-pagina" replace/>;
+        return <Navigate to="/" replace/>;
     }
     return <>{children}</>;
 }
