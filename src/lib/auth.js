@@ -28,7 +28,7 @@ export function getAuthHeaders(extra = {}) {
     const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'x-api-key': API_KEY,
+        'x-api-key': import.meta.env.VITE_API_KEY,
         ...extra,
     };
     if (token) headers['Authorization'] = `Bearer ${token}`;
