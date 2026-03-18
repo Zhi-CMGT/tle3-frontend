@@ -278,6 +278,7 @@ const HomePage = () => {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("userId");
         if (!token) {
             setLoading(false);
             return;
@@ -285,18 +286,36 @@ const HomePage = () => {
 
         const fetchUser = async () => {
             try {
-                const res = await fetch(`http://145.24.237.215:8000/v1/api/user`, {
+                // Prefer v2 single-user endpoint when we have a userId; fallback to v1 list route otherwise
+                const url = userId
+                    ? `http://145.24.237.215:8000/v2/api/user/${userId}`
+                    : `http://145.24.237.215:8000/v1/api/user`;
+
+                const res = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "x-api-key": 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3',
                         "Content-Type": "application/json",
+                        "Accept": "application/json",
                     },
                 });
-                if (!res.ok) throw new Error("Unauthorized");
+
+                if (!res.ok) {
+                    // Only clear token on explicit unauthorized errors. Other status codes may indicate
+                    // a bad request or server issue — don't wipe the token blindly.
+                    if (res.status === 401) {
+                        localStorage.removeItem("token");
+                        setUser(null);
+                    }
+                    throw new Error("Unauthorized");
+                }
+
                 const data = await res.json();
-                setUser(data);
-            } catch {
-                localStorage.removeItem("token");
+                // v2 returns { user }, v1 might return other shape — prefer data.user if present
+                setUser(data.user || data);
+            } catch (err) {
+                // don't aggressively remove token here; we've handled 401 above
+                console.error('Failed to fetch user in HomePage:', err);
                 setUser(null);
             } finally {
                 setLoading(false);

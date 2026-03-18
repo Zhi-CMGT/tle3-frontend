@@ -48,6 +48,8 @@ const LoginPage = () => {
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.user.id);
 
+            window.dispatchEvent(new Event('authChanged'));
+
             alert('Succesvol ingelogd!');
             navigate('/persoonlijke-pagina');
         } catch (error) {

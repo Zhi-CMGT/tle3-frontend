@@ -1,7 +1,49 @@
-import {Link} from "react-router";
+import React, {useEffect, useState} from "react";
+import {Link, useNavigate} from "react-router";
 import HeaderDropdown from "./HeaderDropDown.jsx";
 
 function Nav() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        setIsAuthenticated(!!token);
+
+        // Listen for storage changes (other tabs) to update auth state
+        const onStorage = (e) => {
+            if (e.key === "token") {
+                setIsAuthenticated(!!e.newValue);
+            }
+        };
+
+        // Listen for a custom authChanged event within the same tab
+        const onAuthChanged = () => {
+            const t = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+            setIsAuthenticated(!!t);
+        };
+
+        window.addEventListener("storage", onStorage);
+        window.addEventListener("authChanged", onAuthChanged);
+        return () => {
+            window.removeEventListener("storage", onStorage);
+            window.removeEventListener("authChanged", onAuthChanged);
+        };
+    }, []);
+
+    const handleLogout = () => {
+        // Clear auth related keys and navigate to home
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        setIsAuthenticated(false);
+        navigate("/");
+
+        try {
+            window.dispatchEvent(new Event('authChanged'));
+        } catch (e) {
+        }
+    };
+
     return (
         <nav className="bg-white border-b shadow-sm relative z-20">
             <div className="container mx-auto flex items-center justify-between px-6 py-4">
@@ -22,9 +64,16 @@ function Nav() {
                             Home
                         </Link>
 
-                        <Link to="/login" className="hover:text-blue-700">
-                            Inloggen bij mijn Gemeente
-                        </Link>
+                        {/* Auth-aware link: when logged in show 'Mijn gemeente' and link to personal page */}
+                        {isAuthenticated ? (
+                            <Link to="/Persoonlijke-pagina" className="hover:text-blue-700">
+                                Mijn gemeente
+                            </Link>
+                        ) : (
+                            <Link to="/login" className="hover:text-blue-700">
+                                Inloggen bij mijn Gemeente
+                            </Link>
+                        )}
 
                         <Link to="/" className="hover:text-blue-700">
                             Contact opnemen
@@ -75,6 +124,17 @@ function Nav() {
                             </svg>
                         </div>
                     </Link>
+
+                    {/* Logout button shown only when authenticated */}
+                    {isAuthenticated && (
+                        <button
+                            onClick={handleLogout}
+                            className="ml-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded focus:outline-none"
+                            aria-label="Uitloggen"
+                        >
+                            Uitloggen
+                        </button>
+                    )}
 
                 </div>
 

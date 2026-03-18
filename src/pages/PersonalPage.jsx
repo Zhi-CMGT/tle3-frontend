@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router';
 import DecorativeCircles from '../components/DecorativeCircles.jsx';
 
 const ChevronIcon = ({isOpen}) => (
@@ -48,12 +49,20 @@ function PersonalPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openDropdown, setOpenDropdown] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPersonalData = async () => {
             try {
                 const token = localStorage.getItem('token');
                 const userId = localStorage.getItem('userId');
+
+                if (!token || !userId) {
+                    // Don't attempt the request if we don't have auth info
+                    setError('Niet ingelogd.');
+                    setLoading(false);
+                    return;
+                }
 
                 const response = await fetch(
                     `http://145.24.237.215:8000/v2/api/user/${userId}`, {
@@ -66,18 +75,39 @@ function PersonalPage() {
                         },
                     }
                 );
-                if (!response.ok) throw new Error('Netwerk response was niet ok!');
+
+                if (response.status === 401) {
+                    // token invalid/expired — clear and redirect to login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userId');
+                    window.dispatchEvent(new Event('authChanged'));
+                    navigate('/login');
+                    throw new Error('Niet geautoriseerd (401). Log opnieuw in.');
+                }
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    let parsed;
+                    try {
+                        parsed = JSON.parse(text);
+                    } catch {
+                        parsed = {message: text};
+                    }
+                    throw new Error(parsed.message || `Netwerk response was niet ok (${response.status})`);
+                }
+
                 const data = await response.json();
 
                 setPersonalData(data.user);
             } catch (error) {
+                console.error('PersonalPage fetch error:', error);
                 setError(error.message);
             } finally {
                 setLoading(false);
             }
         };
         fetchPersonalData();
-    }, []);
+    }, [navigate]);
 
     const toggleDropdown = (dropdown) => {
         setOpenDropdown(openDropdown === dropdown ? null : dropdown);

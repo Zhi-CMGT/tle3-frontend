@@ -85,7 +85,7 @@ function EditPersonalPage() {
                     throw new Error("Niet ingelogd");
                 }
 
-                const response = await fetch(`http://145.24.237.215:8000/v1/api/user/${userId}`, {
+                const response = await fetch(`http://145.24.237.215:8000/v2/api/user/${userId}`, {
                     headers: {
                         "Accept": "application/json",
                         'Authorization': `Bearer ${token}`,
