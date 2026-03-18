@@ -1,47 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {Link, useNavigate} from "react-router";
 import HeaderDropdown from "./HeaderDropDown.jsx";
+import {useAuth} from '../contexts/AuthContext.jsx';
 
 function Nav() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const {isAuthenticated, logout} = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        setIsAuthenticated(!!token);
-
-        // Listen for storage changes (other tabs) to update auth state
-        const onStorage = (e) => {
-            if (e.key === "token") {
-                setIsAuthenticated(!!e.newValue);
-            }
-        };
-
-        // Listen for a custom authChanged event within the same tab
-        const onAuthChanged = () => {
-            const t = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-            setIsAuthenticated(!!t);
-        };
-
-        window.addEventListener("storage", onStorage);
-        window.addEventListener("authChanged", onAuthChanged);
-        return () => {
-            window.removeEventListener("storage", onStorage);
-            window.removeEventListener("authChanged", onAuthChanged);
-        };
-    }, []);
-
     const handleLogout = () => {
-        // Clear auth related keys and navigate to home
-        localStorage.removeItem("token");
-        localStorage.removeItem("userId");
-        setIsAuthenticated(false);
-        navigate("/");
-
-        try {
-            window.dispatchEvent(new Event('authChanged'));
-        } catch (e) {
-        }
+        logout();
+        navigate('/');
     };
 
     return (

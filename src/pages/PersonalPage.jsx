@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import {useNavigate} from 'react-router';
 import DecorativeCircles from '../components/DecorativeCircles.jsx';
+import {useAuth} from '../contexts/AuthContext.jsx';
+import {getAuthHeaders} from '../lib/auth.js';
 
 const ChevronIcon = ({isOpen}) => (
     <svg
@@ -50,14 +52,16 @@ function PersonalPage() {
     const [error, setError] = useState(null);
     const [openDropdown, setOpenDropdown] = useState(null);
     const navigate = useNavigate();
+    const auth = useAuth();
 
     useEffect(() => {
         const fetchPersonalData = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const userId = localStorage.getItem('userId');
+                // read from localStorage for id/token
+                const tokenLocal = localStorage.getItem('token');
+                const userIdLocal = localStorage.getItem('userId');
 
-                if (!token || !userId) {
+                if (!tokenLocal || !userIdLocal) {
                     // Don't attempt the request if we don't have auth info
                     setError('Niet ingelogd.');
                     setLoading(false);
@@ -65,22 +69,22 @@ function PersonalPage() {
                 }
 
                 const response = await fetch(
-                    `http://145.24.237.215:8000/v2/api/user/${userId}`, {
+                    `http://145.24.237.215:8000/v2/api/user/${userIdLocal}`, {
                         method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                            'x-api-key': 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3'
-                        },
+                        headers: getAuthHeaders(),
                     }
                 );
 
                 if (response.status === 401) {
-                    // token invalid/expired — clear and redirect to login
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userId');
-                    window.dispatchEvent(new Event('authChanged'));
+                    // token invalid/expired — use AuthContext logout if available
+                    try {
+                        auth.logout();
+                    } catch (e) {
+                        try {
+                            window.dispatchEvent(new Event('authChanged'));
+                        } catch {
+                        }
+                    }
                     navigate('/login');
                     throw new Error('Niet geautoriseerd (401). Log opnieuw in.');
                 }
@@ -107,7 +111,7 @@ function PersonalPage() {
             }
         };
         fetchPersonalData();
-    }, [navigate]);
+    }, [navigate, auth]);
 
     const toggleDropdown = (dropdown) => {
         setOpenDropdown(openDropdown === dropdown ? null : dropdown);

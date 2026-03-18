@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router';
 import DecorativeCircles from '../components/DecorativeCircles.jsx';
+import {useAuth} from '../contexts/AuthContext.jsx';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const LoginPage = () => {
     });
 
     const navigate = useNavigate();
+    const {login} = useAuth();
 
     const handleInputChange = (e) => {
         const {name, value} = e.target;
@@ -45,10 +47,9 @@ const LoginPage = () => {
             }
 
             const data = await response.json();
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userId', data.user.id);
 
-            window.dispatchEvent(new Event('authChanged'));
+            // Use AuthContext login so state is consistent
+            login({token: data.token, userId: data.user.id});
 
             alert('Succesvol ingelogd!');
             navigate('/persoonlijke-pagina');

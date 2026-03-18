@@ -8,11 +8,22 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import PersonalPage from "./pages/PersonalPage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import EditPersonalPage from "./pages/EditPersonalPage.jsx";
+import {AuthProvider, useAuth} from './contexts/AuthContext.jsx';
 
 function ProtectedRoute({children}) {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) {
+    const {isAuthenticated} = useAuth();
+    if (!isAuthenticated) {
         return <Navigate to="/login" replace/>;
+    }
+    return <>{children}</>;
+}
+
+// PublicRoute: redirect authenticated users away from public pages (like /login)
+function PublicRoute({children}) {
+    const {isAuthenticated} = useAuth();
+    if (isAuthenticated) {
+        // If user is logged in, send to their personal page (or home)
+        return <Navigate to="/Persoonlijke-pagina" replace/>;
     }
     return <>{children}</>;
 }
@@ -28,7 +39,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/login",
-                element: <LoginPage/>
+                element: (
+                    <PublicRoute>
+                        <LoginPage/>
+                    </PublicRoute>
+                )
             },
             {
                 path: "/registreren",
@@ -44,7 +59,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/WMO-help",
-                element: <WMOHelp/>
+                element: (
+                    <ProtectedRoute>
+                        <WMOHelp/>
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "/Registreren",
@@ -68,9 +87,11 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-
-    return <RouterProvider router={router}/>
-
+    return (
+        <AuthProvider>
+            <RouterProvider router={router}/>
+        </AuthProvider>
+    );
 }
 
 export default App
