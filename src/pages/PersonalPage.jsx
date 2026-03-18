@@ -58,26 +58,24 @@ function PersonalPage() {
                 const userId = localStorage.getItem('userId');
 
                 if (!token || !userId) {
-                    // Don't attempt the request if we don't have auth info
                     setError('Niet ingelogd.');
                     setLoading(false);
                     return;
                 }
 
                 const response = await fetch(
-                    `http://145.24.237.215:8000/v2/api/user/${userId}`, {
+                    `${import.meta.env.VITE_BASE_URI}user/${userId}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json',
                             'Authorization': `Bearer ${token}`,
-                            'x-api-key': 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3'
+                            'x-api-key': import.meta.env.VITE_API_KEY,
                         },
                     }
                 );
 
                 if (response.status === 401) {
-                    // token invalid/expired — clear and redirect to login
                     localStorage.removeItem('token');
                     localStorage.removeItem('userId');
                     window.dispatchEvent(new Event('authChanged'));
