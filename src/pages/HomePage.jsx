@@ -37,8 +37,8 @@ const HomePage = () => {
     const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [categoriesError, setCategoriesError] = useState(null);
     const [contentItems, setContentItems] = useState([]);
-    const [setContentLoading] = useState(true);
-    const [setContentItemsError] = useState(null);
+    const [contentLoading, setContentLoading] = useState(true);
+    const [contentItemsError, setContentItemsError] = useState(null);
     const [recommendations, setRecommendations] = useState([]);
 
     useEffect(() => {
