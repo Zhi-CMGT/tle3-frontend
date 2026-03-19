@@ -144,9 +144,10 @@ export default function Footer() {
                         <li><a href="#"
                                className="hover:underline focus-visible:outline  focus-visible:outline-white rounded">Informatiebeveiliging
                             melden</a></li>
-                        <li><a href="#"
-                               className="hover:underline focus-visible:outline  focus-visible:outline-white rounded">Openingstijden
-                            en contact</a></li>
+                        <li><a href="/ai-transparantie"
+                               className="hover:underline focus-visible:outline  focus-visible:outline-white rounded">AI
+                            transparantie
+                        </a></li>
                     </ul>
                 </nav>
 

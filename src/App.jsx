@@ -9,6 +9,7 @@ import PersonalPage from "./pages/PersonalPage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import EditPersonalPage from "./pages/EditPersonalPage.jsx";
 import {AuthProvider, useAuth} from './contexts/AuthContext.jsx';
+import AITransparency from "./pages/AITransparancy.jsx";
 
 function ProtectedRoute({children}) {
     const {isAuthenticated} = useAuth();
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
                 element: <ProtectedRoute>
                     <EditPersonalPage/>
                 </ProtectedRoute>
+            },
+            {
+                path: "/ai-transparantie",
+                element: <AITransparency/>
             },
             {
                 path: "*",
