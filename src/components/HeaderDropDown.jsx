@@ -1,8 +1,24 @@
+// javascript
+// src/components/HeaderDropDown.jsx
 import {useState} from "react";
 import {Link} from "react-router";
 
 export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const aanvragenItems = [
+        {label: "WMO aanvragen", to: "/WMO-help"},
+        {label: "Paspoort aanvragen", to: "/paspoort-aanvragen"},
+        {label: "Huurtoeslag aanvragen", to: "/huurtoeslag"},
+        {label: "Bijzondere bijstand aanvragen", to: "/bijzondere-bijstand"},
+    ];
+
+    const regelenItems = [
+        {label: "Melding openbare ruimte doen", to: "/melding-openbare-ruimte"},
+        {label: "Overlijden melden", to: "/overlijden-melden"},
+        {label: "Adres wijzigen", to: "/adres-wijzigen"},
+        {label: "Afval aanmelden", to: "/afval-aanmelden"},
+    ];
 
     return (
         <>
@@ -45,7 +61,7 @@ export default function Navbar() {
             >
                 <div className="mx-auto max-w-7xl px-4 py-6">
                     <div className="flex items-center justify-between">
-                        <span className="text-[#004A99] font-semibold">Menu</span>
+                        <span className="text-[#004A99] font-semibold">Vind hier snel uw aanvraag of situatie die u wilt regelen!</span>
 
                         <button
                             onClick={() => setMenuOpen(false)}
@@ -56,28 +72,38 @@ export default function Navbar() {
                         </button>
                     </div>
 
-                    <nav className="mt-6 flex flex-col gap-4">
-                        <Link
-                            to="/"
-                            className="text-[#004A99] hover:text-blue-700"
-                            onClick={() => setMenuOpen(false)}
-                        >
-                            Home
-                        </Link>
-                        <Link
-                            to="/about"
-                            className="text-[#004A99] hover:text-blue-700"
-                            onClick={() => setMenuOpen(false)}
-                        >
-                            Over ons
-                        </Link>
-                        <Link
-                            to="/contact"
-                            className="text-[#004A99] hover:text-blue-700"
-                            onClick={() => setMenuOpen(false)}
-                        >
-                            Contact
-                        </Link>
+                    <nav className="mt-6 flex flex-col gap-6">
+                        <div>
+                            <div className="text-sm font-semibold text-[#004A99] mb-3">Aanvragen</div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {aanvragenItems.map((item) => (
+                                    <Link
+                                        key={item.to}
+                                        to={item.to}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="block w-full bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-[#004A99] font-medium hover:bg-blue-100 transition text-center"
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className="text-sm font-semibold text-[#004A99] mb-3">Regelen</div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {regelenItems.map((item) => (
+                                    <Link
+                                        key={item.to}
+                                        to={item.to}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="block w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-[#004A99] font-medium hover:bg-gray-50 transition text-center"
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
                     </nav>
                 </div>
             </div>

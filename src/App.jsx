@@ -45,7 +45,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/registreren",
-                element: <RegisterPage/>
+                element: (
+                    <PublicRoute>
+                        <RegisterPage/>
+                    </PublicRoute>
+                )
             },
             {
                 path: "/WMO-formulieren",
@@ -58,22 +62,30 @@ const router = createBrowserRouter([
             {
                 path: "/WMO-help",
                 element: (
-                    <ProtectedRoute>
                         <WMOHelp/>
-                    </ProtectedRoute>
                 )
             },
             {
                 path: "/Registreren",
-                element: <RegisterPage/>
+                element: (
+                    <PublicRoute>
+                        <RegisterPage/>
+                    </PublicRoute>
+                )
             },
             {
                 path: "/Persoonlijke-pagina",
-                element: <PersonalPage/>
+                element: (
+                    <ProtectedRoute>
+                        <PersonalPage/>
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "/Bewerken-Persoonlijke-pagina",
-                element: <EditPersonalPage/>
+                element: <ProtectedRoute>
+                    <EditPersonalPage/>
+                </ProtectedRoute>
             },
             {
                 path: "*",

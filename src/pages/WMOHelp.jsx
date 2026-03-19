@@ -1,19 +1,5 @@
 import React from 'react';
 import {Link} from 'react-router';
-import {useNavigate} from 'react-router';
-
-// import Accordion from '../components/Accordion';
-// import { BrowserRouter, Routes, Route } from 'react-router-dom';
-// import Navbar from './components/Navbar';
-// import Footer from './components/Footer';
-// import Home from './pages/Home';
-// import WMOForm from './pages/WMOForm';
-// import CategoryDetail from './pages/CategoryDetail';
-// import AllTopics from './pages/AllTopics';
-// import Article from './pages/Article';
-// import LoginPage from './pages/LoginPage.jsx';
-// import PersonalPage from './pages/PersonalPage.jsx';
-// import WMOHelp from "./pages/WMOHelp";
 
 function WMOHelp() {
 

@@ -1,7 +1,11 @@
+// javascript
 import React, {useEffect, useState} from "react";
-import {useNavigate} from 'react-router';
+import {getAuthHeaders} from '../lib/auth.js';
+import {useAuth} from '../contexts/AuthContext.jsx';
 
 export default function MultiStepForm() {
+    const {userId} = useAuth();
+
     const [step, setStep] = useState(1);
 
     const [formData, setFormData] = useState({
@@ -18,12 +22,55 @@ export default function MultiStepForm() {
     const [loadingTypes, setLoadingTypes] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [resultMessage, setResultMessage] = useState("");
+    const [errors, setErrors] = useState({});
 
-    const USER_ID = "69b157e7c5851af11eca54de";
-    const API_BASE_URL = "http://127.0.0.1:8000/api";
+    const validateEmail = (email) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
 
-    const nextStep = () => {
-        setStep((prev) => prev + 1);
+    const validatePostcode = (pc) => {
+        return /^\d{4}\s?[A-Za-z]{2}$/.test(pc.trim());
+    };
+
+    const validateStep = (s) => {
+        const newErrors = {};
+        if (s === 1) {
+            if (!formData.naam.trim()) newErrors.naam = "Naam is vereist.";
+            if (!formData.email.trim()) newErrors.email = "Email is vereist.";
+            else if (!validateEmail(formData.email.trim())) newErrors.email = "Voer een geldig emailadres in.";
+        } else if (s === 2) {
+            if (!formData.straat.trim()) newErrors.straat = "Straat is vereist.";
+            if (!formData.postcode.trim()) newErrors.postcode = "Postcode is vereist.";
+            else if (!validatePostcode(formData.postcode)) newErrors.postcode = "Voer een geldige postcode in (1234AB of 1234 AB).";
+        } else if (s === 3) {
+            if (!selectedOption) newErrors.selectedOption = "Kies een aanvraagtype.";
+        } else if (s === 4) {
+            if (!formData.question.trim()) newErrors.question = "Korte vraag is vereist.";
+            if (!formData.description.trim() || formData.description.trim().length < 10) newErrors.description = "Beschrijf uw situatie (minimaal 10 tekens).";
+        }
+        setErrors((prev) => ({...prev, ...newErrors}));
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const validateAll = () => {
+        const stepsToCheck = [1, 2, 3, 4];
+        for (const s of stepsToCheck) {
+            if (!validateStep(s)) {
+                // move user to first failing step
+                setStep(s);
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const handleNext = () => {
+        setResultMessage("");
+        if (validateStep(step)) {
+            setStep((prev) => prev + 1);
+        } else {
+            setResultMessage("Controleer de velden in deze stap.");
+        }
     };
 
     const prevStep = () => {
@@ -36,6 +83,8 @@ export default function MultiStepForm() {
             ...prev,
             [name]: value
         }));
+        // clear field error while typing
+        setErrors((prev) => ({...prev, [name]: ""}));
     };
 
     useEffect(() => {
@@ -43,11 +92,7 @@ export default function MultiStepForm() {
             try {
                 const response = await fetch(`http://145.24.237.215:8000/v2/api/inquiry-types`, {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        'x-api-key': 'sk_c7a4ae50811334db8bf1f577a0f5c90e4a5c6cc440f70c5c14e752a5d88409d3',
-                        'Accept': 'application/json',
-                    }
+                    headers: getAuthHeaders()
                 });
 
                 if (!response.ok) {
@@ -67,17 +112,59 @@ export default function MultiStepForm() {
         fetchInquiryTypes();
     }, []);
 
+    // New effect: fetch current user and pre-fill naam/email if available and fields are empty
+    useEffect(() => {
+        if (!userId) return;
+
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(`http://145.24.237.215:8000/v2/api/user/${userId}`, {
+                    method: 'GET',
+                    headers: getAuthHeaders()
+                });
+
+                if (!res.ok) {
+                    // don't throw for 401/other here; just skip prefilling
+                    console.warn('Could not fetch user for prefilling WMO form:', res.status);
+                    return;
+                }
+
+                const json = await res.json();
+                const user = json.user || {};
+
+                const computedName = (user.first_name || user.name || '') + (user.last_name ? ` ${user.last_name}` : '');
+                setFormData(prev => ({
+                    ...prev,
+                    naam: prev.naam && prev.naam.trim() ? prev.naam : (computedName.trim() || prev.naam),
+                    email: prev.email && prev.email.trim() ? prev.email : (user.email || prev.email)
+                }));
+            } catch (err) {
+                console.error('Prefill user error:', err);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [userId]);
+
     const handleSubmit = async () => {
+        setResultMessage("");
+        if (!validateAll()) {
+            return;
+        }
+
         if (!selectedOption) {
-            setResultMessage("Kies eerst een type aanvraag.");
+            setErrors((prev) => ({...prev, selectedOption: "Kies een aanvraagtype."}));
+            setResultMessage("Kies een aanvraagtype.");
+            setStep(3);
             return;
         }
 
         setSubmitting(true);
-        setResultMessage("");
 
         const payload = {
-            user_id: USER_ID,
             type_id: selectedOption,
             created_at: new Date().toISOString(),
             content: {
@@ -92,15 +179,21 @@ export default function MultiStepForm() {
         };
 
         try {
-            const response = await fetch(`http://145.24.237.215:8000/api/inquiry`, {
+            const response = await fetch(`http://145.24.237.215:8000/v2/api/inquiry`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(payload)
             });
 
-            const data = await response.json();
+            const contentType = response.headers.get('content-type') || '';
+            let data;
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.error('Inquiry POST returned non-JSON:', text);
+                throw new Error(text || 'Ongeldig antwoord bij verzenden aanvraag');
+            }
 
             if (!response.ok) {
                 throw new Error(data.message || "Er ging iets mis bij het versturen.");
@@ -118,23 +211,12 @@ export default function MultiStepForm() {
 
     return (
         <div className="min-h-screen bg-gray-200 flex flex-col items-center">
-
-            {/* HEADER SECTION */}
             <div className="w-full bg-blue-200 py-12 px-6 shadow-md rounded-b-xl mb-12">
+                <h1 className="text-3xl font-semibold text-center mb-2">WMO-aanvragen</h1>
+                <p className="text-center text-gray-700 mb-10">Wet maatschappelijke ondersteuning</p>
 
-                <h1 className="text-3xl font-semibold text-center mb-2">
-                    WMO-aanvragen
-                </h1>
-
-                <p className="text-center text-gray-700 mb-10">
-                    Wet maatschappelijke ondersteuning
-                </p>
-
-                {/* TIMELINE */}
                 <div className="max-w-4xl mx-auto">
-
                     <div className="relative flex items-center justify-between">
-
                         <div className="absolute top-1/2 left-4 right-4 h-2 bg-blue-800 -translate-y-1/2"></div>
 
                         {[1, 2, 3, 4, 5].map((s) => (
@@ -149,21 +231,14 @@ export default function MultiStepForm() {
                                 }`}
                             />
                         ))}
-
                     </div>
 
-                    <p className="text-center text-gray-700 mt-4">
-                        Stap {step} van 5
-                    </p>
-
+                    <p className="text-center text-gray-700 mt-4">Stap {step} van 5</p>
                 </div>
-
             </div>
 
-            {/* FORM CONTAINER */}
             <div
                 className="bg-white border-4 border-blue-800 rounded-xl shadow-xl w-full max-w-5xl p-16 mb-20 mx-6 h-auto">
-
                 {resultMessage && (
                     <div className="mb-4 p-3 rounded bg-gray-100 text-sm text-gray-700">
                         {resultMessage}
@@ -180,8 +255,9 @@ export default function MultiStepForm() {
                             placeholder="Naam"
                             value={formData.naam}
                             onChange={handleChange}
-                            className="border p-2 w-full mb-3"
+                            className="border p-2 w-full mb-1"
                         />
+                        {errors.naam && <div className="text-red-600 text-sm mb-2">{errors.naam}</div>}
 
                         <input
                             type="email"
@@ -191,9 +267,10 @@ export default function MultiStepForm() {
                             onChange={handleChange}
                             className="border p-2 w-full"
                         />
+                        {errors.email && <div className="text-red-600 text-sm mb-2">{errors.email}</div>}
 
                         <button
-                            onClick={nextStep}
+                            onClick={handleNext}
                             className="mt-6 bg-blue-600 text-white px-4 py-2 rounded"
                         >
                             Volgende
@@ -211,17 +288,19 @@ export default function MultiStepForm() {
                             placeholder="Straat"
                             value={formData.straat}
                             onChange={handleChange}
-                            className="border p-2 w-full mb-3"
+                            className="border p-2 w-full mb-1"
                         />
+                        {errors.straat && <div className="text-red-600 text-sm mb-2">{errors.straat}</div>}
 
                         <input
                             type="text"
                             name="postcode"
-                            placeholder="Postcode"
+                            placeholder="Postcode (1234AB)"
                             value={formData.postcode}
                             onChange={handleChange}
                             className="border p-2 w-full"
                         />
+                        {errors.postcode && <div className="text-red-600 text-sm mb-2">{errors.postcode}</div>}
 
                         <div className="flex justify-between mt-6">
                             <button
@@ -232,7 +311,7 @@ export default function MultiStepForm() {
                             </button>
 
                             <button
-                                onClick={nextStep}
+                                onClick={handleNext}
                                 className="bg-blue-600 text-white px-4 py-2 rounded"
                             >
                                 Volgende
@@ -252,7 +331,10 @@ export default function MultiStepForm() {
                                 {inquiryTypes.map((type) => (
                                     <label
                                         key={type.id || type._id}
-                                        onClick={() => setSelectedOption(type.id || type._id)}
+                                        onClick={() => {
+                                            setSelectedOption(type.id || type._id);
+                                            setErrors((prev) => ({...prev, selectedOption: ""}));
+                                        }}
                                         className={`border rounded p-3 cursor-pointer ${
                                             selectedOption === (type.id || type._id)
                                                 ? "border-blue-600 bg-blue-50"
@@ -261,14 +343,14 @@ export default function MultiStepForm() {
                                     >
                                         <div className="font-medium">{type.name}</div>
                                         {type.description && (
-                                            <div className="text-sm text-gray-600 mt-1">
-                                                {type.description}
-                                            </div>
+                                            <div className="text-sm text-gray-600 mt-1">{type.description}</div>
                                         )}
                                     </label>
                                 ))}
                             </div>
                         )}
+                        {errors.selectedOption &&
+                            <div className="text-red-600 text-sm mb-2">{errors.selectedOption}</div>}
 
                         <div className="flex justify-between mt-6">
                             <button
@@ -279,7 +361,7 @@ export default function MultiStepForm() {
                             </button>
 
                             <button
-                                onClick={nextStep}
+                                onClick={handleNext}
                                 className="bg-blue-600 text-white px-4 py-2 rounded"
                             >
                                 Volgende
@@ -298,8 +380,9 @@ export default function MultiStepForm() {
                             placeholder="Korte vraag"
                             value={formData.question}
                             onChange={handleChange}
-                            className="border p-2 w-full mb-3"
+                            className="border p-2 w-full mb-1"
                         />
+                        {errors.question && <div className="text-red-600 text-sm mb-2">{errors.question}</div>}
 
                         <textarea
                             name="description"
@@ -309,6 +392,7 @@ export default function MultiStepForm() {
                             className="border p-2 w-full"
                             rows={6}
                         />
+                        {errors.description && <div className="text-red-600 text-sm mb-2">{errors.description}</div>}
 
                         <div className="flex justify-between mt-6">
                             <button
@@ -319,7 +403,7 @@ export default function MultiStepForm() {
                             </button>
 
                             <button
-                                onClick={nextStep}
+                                onClick={handleNext}
                                 className="bg-blue-600 text-white px-4 py-2 rounded"
                             >
                                 Volgende
@@ -359,9 +443,7 @@ export default function MultiStepForm() {
                         </div>
                     </div>
                 )}
-
             </div>
-
         </div>
     );
 }
