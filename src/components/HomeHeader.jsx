@@ -1,5 +1,5 @@
 import React from "react";
-import headerBg from "../assets/react.svg";
+import headerBg from "../assets/header-bg.jpg";
 import SearchBar from "./SearchBar";
 import RelevantSection from "./RelevantSection";
 
