@@ -1,7 +1,62 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Link} from 'react-router';
 
+function DropdownSection({title, children, color = "gray"}) {
+    const [open, setOpen] = useState(false);
+
+    const colorStyles = {
+        gray: "text-gray-800 hover:bg-gray-50 focus:ring-gray-300",
+        blue: "text-blue-800 hover:bg-blue-50 focus:ring-blue-300 bg-blue-50"
+    };
+
+    return (
+        <div className="rounded-lg border bg-white">
+            <button
+                type="button"
+                className={`w-full flex items-center justify-between px-4 py-3 text-left font-medium rounded-t-lg focus:outline-none focus:ring-2 ${colorStyles[color]}`}
+                onClick={() => setOpen(v => !v)}
+                aria-expanded={open}
+            >
+                <span>{title}</span>
+                <span className={`transform transition-transform ${open ? 'rotate-180' : ''}`}>▾</span>
+            </button>
+
+            <div
+                className={`px-4 pb-4 transition-all ${open ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                {children}
+            </div>
+        </div>
+    );
+}
+
+function AccordionItem({title, content, isOpen, onToggle}) {
+    return (
+        <div className="mb-4 rounded-2xl border bg-white overflow-hidden">
+            <button
+                onClick={onToggle}
+                className="w-full flex items-center justify-between px-6 py-5 text-gray-700 font-medium text-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                type="button"
+                aria-expanded={isOpen}
+            >
+                <span>{title}</span>
+                <span className="text-gray-400">{isOpen ? '▴' : '▾'}</span>
+            </button>
+            <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[1200px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-6 pb-6 border-t border-gray-100">
+                    {content}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function WMOHelp() {
+    const [openIndex, setOpenIndex] = useState(null);
+
+    const handleToggle = (i) => {
+        setOpenIndex(prev => (prev === i ? null : i));
+    };
 
     const accordionItems = [
         {
@@ -20,13 +75,9 @@ function WMOHelp() {
                         <li>U moeite heeft met dagelijkse activiteiten, zoals boodschappen doen of administratie</li>
                         <li>U begeleiding nodig heeft bij het aanbrengen van structuur in uw dag</li>
                         <li>Uw woning aangepast moet worden (bijvoorbeeld met een traplift of aangepaste badkamer)</li>
-                        <li>U aanpast vervoer nodig heeft</li>
+                        <li>U aangepast vervoer nodig heeft</li>
                         <li>U zonder ondersteuning niet zelfstandig thuis kunt blijven wonen</li>
                     </ul>
-                    <p className="text-sm text-gray-700 italic mt-4">
-                        De gemeente kijkt altijd eerst naar wat u zelf nog kunt en of mensen in uw omgeving kunnen
-                        helpen. Daarna bepalen we samen of en hoe de gemeente ondersteuning kan bieden.
-                    </p>
                 </div>
             ),
         },
@@ -37,11 +88,8 @@ function WMOHelp() {
                     <p className="text-sm leading-relaxed">
                         Als inwoner kun je met zorg- en ondersteuningsvragen bij Stichting ZO! terecht. De gemeente is
                         vooral verantwoordelijk voor de administratie en de financiële afwikkeling als er een
-                        maatwerk­voorziening is aangevraagd. Gemeente Zuidplas blijft als de declaraties en de factu­ren
-                        van zorgaanbieders verwerken en afhandelen. Voor alle andere inhoudelijke vragen die over hulp
-                        en ondersteuning gaan kun je bij Stichting ZO! terecht. De beschikking wordt door de gemeente
-                        opgesteld, daarmee blijft het college van burgemeester en wethouders verantwoordelijk voor het
-                        besluit. Mocht je bezwaar hebben tegen het besluit, ga dan naar de pagina 'Bezwaar maken'.
+                        maatwerk­voorziening is aangevraagd. Voor alle andere inhoudelijke vragen die over hulp
+                        en ondersteuning gaan kun je bij Stichting ZO! terecht.
                     </p>
                 </div>
             ),
@@ -49,113 +97,75 @@ function WMOHelp() {
         {
             title: 'WMO aanvragen bij Stichting ZO!',
             content: (
-                <div className="space-y-6">
-                    <div>
-                        <h4 className="font-bold text-gray-900 mb-3">Stichting ZO!</h4>
-                        <p className="text-sm leading-relaxed text-gray-700 mb-3">
-                            Stichting ZO! is er voor iedere inwoner van gemeente Zuidplas die een vraag heeft over
-                            welzijn en zorg. Bij Stichting ZO! kun je terecht voor alle vragen en zorgen over geldzaken,
-                            wonen, school, (mantel)zorg, jeugdhulp, gezin/relatie, inburgering en ouder worden.
-                            Daarnaast kun je er terecht voor informatie rond vrijwilligerswerk
-                            (www.stzo.nl/vrijwilligerswerk), voor inzet in jouw buurt (www.stzo.nl/zuidplasverbindt)
-                            voor meerdoen aan veel verschillende activiteiten voor alle leeftijden
-                            (www.stzo.nl/activiteiten).
-                        </p>
-                    </div>
+                <div className="space-y-4">
+                    <p className="text-sm leading-relaxed">
+                        Hieronder staat stap voor stap wat er gebeurt bij het aanvragen van WMO-hulp via Stichting ZO!.
+                        Gebruik de drie uitklapbare secties om meer details te zien.
+                    </p>
 
-                    <div className="bg-blue-50 border border-blue-300 p-4 rounded">
-                        <h5 className="font-bold text-gray-900 mb-2">Wat is Stichting ZO!</h5>
-                        <p className="text-sm text-gray-700">
-                            Makkelijk en snel toegang tot zorg, welzijn en ondersteuning. Dat is het doel van Stichting
-                            ZO! Sinds 2021 is ZO! de plek waar ervaring en kennis in de gemeente Zuidplas op één plek
-                            samenkomt. ZO! gaat uit van samenwerking en van eigen kracht. Tijdens onze activiteiten en
-                            diensten staan ontmoeten, ontdekken, omarmen en ondersteunen centraal.
-                        </p>
-                    </div>
+                    <div className="space-y-3">
+                        <DropdownSection title="1. Voorbereiden: wat heeft u nodig?">
+                            <div className="text-sm space-y-2">
+                                <p>Voor de aanvraag heeft u meestal de volgende gegevens nodig:</p>
+                                <ul className="list-disc list-inside">
+                                    <li>Een geldig legitimatiebewijs</li>
+                                    <li>Uw burgerservicenummer (BSN)</li>
+                                    <li>Een beschrijving van de hulpvraag</li>
+                                    <li>Eventuele medische documenten of verklaringen</li>
+                                </ul>
+                                <p className="text-sm">
+                                    Tip: verzamel ook contactgegevens van eventueel betrokken mantelzorgers of
+                                    hulpverleners.
+                                </p>
+                            </div>
+                        </DropdownSection>
 
-                    <div className="bg-blue-50 border border-blue-300 p-4 rounded">
-                        <h5 className="font-bold text-gray-900 mb-2">Zovoerelkaar</h5>
-                        <p className="text-sm text-gray-700 mb-2">
-                            ZO! is ook de initiatiefnemer van de website www.zovoerelkaar.nl. Dit is het digitale
-                            dorpsplein van Zuidplas waar iedereen onder meer berichten, activiteiten en
-                            vrijwilligerswerk kan plaatsen. Er is een nauwe samenwerking tussen Stichting ZO! en de
-                            gemeente Zuidplas.
-                        </p>
-                        <p className="text-sm text-gray-700">
-                            <span
-                                className="font-semibold">Bekijk hier ook de flyer in pdf format over Stichting ZO!</span>
-                        </p>
-                    </div>
+                        <DropdownSection title="2. Procedure: hoe wordt uw aanvraag behandeld?" color="blue">
+                            <div className="text-sm space-y-2">
+                                <p>
+                                    Na indienen van uw WMO-formulier sturen wij die op naar Stichting ZO! De stappen
+                                    voor uw aanvraag zijn als volgt:
+                                </p>
+                                <ol className="list-decimal list-inside">
+                                    <p className="text-2xl">Voor u:</p>
+                                    <li>Login bij uw gemeente, dit kan via de navigatie bar.</li>
+                                    <li>Het invullen van Dit WMO-formulier
+                                        <div className="mt-3">
+                                            <Link
+                                                to="/WMO-formulieren"
+                                                className="inline-block bg-[#004A99] text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                                            >
+                                                Naar WMO-formulier
+                                            </Link>
+                                        </div>
+                                    </li>
 
-                    <Link
-                        to="/wmo-form"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center gap-2"
-                    >
-                        Wmo-melding doen
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                  d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                        </svg>
-                    </Link>
+                                    <p className="text-2xl">Voor ons:</p>
+                                    <li>Intake en inventarisatie van uw situatie</li>
+                                    <li>Beoordeling of er een maatwerkvoorziening nodig is</li>
+                                    <li>Opstellen van een advies en eventuele beschikking door de gemeente</li>
+                                </ol>
+                            </div>
+                        </DropdownSection>
 
-                    <div className="bg-blue-50 border border-blue-300 p-4 rounded">
-                        <h5 className="font-bold text-gray-900 mb-3">Wat regel je nog meer via Stichting ZO!</h5>
-                        <p className="text-sm text-gray-700 mb-3">
-                            Je kunt er terecht voor je informatie over vrijwilligerswerk, voor inzet in jouw buurt en
-                            voor meerdoen aan veel verschillende activiteiten voor alle leeftijden. Daarnaast kun je er
-                            terecht voor Zorg en hulp, onder andere:
-                        </p>
-                        <ul className="text-sm text-gray-700 space-y-1 mb-4">
-                            <li><span className="underline">Jeugdhulp</span></li>
-                            <li><span className="underline">Jeugdgezondheidszorg</span></li>
-                            <li><span className="underline">Inburgeren (civic integration programme)</span></li>
-                        </ul>
-                        <p className="text-sm text-gray-700 mb-3">
-                            Geldzaken (kijk ook op de pagina 'Geldzaken bij Stichting ZO!'), onder andere:
-                        </p>
-                        <ul className="text-sm text-gray-700 space-y-1 mb-4">
-                            <li><span className="underline">Budgetmaatjes</span></li>
-                            <li><span className="underline">De sociaal raadsvrouw</span></li>
-                            <li><span className="underline">De Postkamer</span></li>
-                            <li><span className="underline">Beginnende schulden</span></li>
-                            <li><span className="underline">Kindpakket</span></li>
-                        </ul>
-                        <p className="text-sm text-gray-700 font-semibold mb-3">
-                            Vrijwilligerswerk:
-                        </p>
-                        <ul className="text-sm text-gray-700 space-y-1 mb-4">
-                            <li><span className="underline">Vrijwilligerswerk</span></li>
-                            <li><span className="underline">Vrijwilligersverzekering</span></li>
-                            <li><span className="underline">Vrijwilligerswaardering</span></li>
-                            <li><span className="underline">Vrijwilligers Informatie Punt (VIP)</span></li>
-                            <li><span className="underline">Rechten en plichten van vrijwilligers</span></li>
-                        </ul>
-                        <p className="text-sm text-gray-700">
-                            Daarnaast kun je hier terecht voor alle informatie rond vrijwilligerswerk, voor inzet in
-                            jouw buurt en voor meerdoen aan veel verschillende activiteiten voor alle leeftijden.
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={() => window.open('https://www.stzo.nl', '_blank')}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center gap-2"
-                    >
-                        www.stzo.nl
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                  d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                        </svg>
-                    </button>
-
-                    <div className="bg-blue-50 border border-blue-300 p-4 rounded">
-                        <h5 className="font-bold text-gray-900 mb-2">Vragen of meer informatie</h5>
-                        <p className="text-sm text-gray-700 mb-3">
-                            Voor meer informatie of vragen kun je contact opnemen met de medewerkers van Stichting ZO!
-                        </p>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                            <li>(0180) 310 050 (bereikbaar op werkdagen tussen 08.30 uur en 16.30 uur)</li>
-                            <li><span className="underline">Info@stzo.nl</span></li>
-                        </ul>
+                        <DropdownSection title="3. Nazorg en contact">
+                            <div className="text-sm space-y-2">
+                                <p>
+                                    Nadat de voorziening is toegekend, kunt u contact houden voor vragen of wijzigingen.
+                                    Veelgestelde acties:
+                                </p>
+                                <ul className="list-disc list-inside">
+                                    <li>Wijzigen van contactgegevens</li>
+                                    <li>Aanpassen van de zorg (bijvoorbeeld uren of type hulp)</li>
+                                    <li>Bezwaar maken tegen een besluit (link hieronder)</li>
+                                </ul>
+                                <div className="pt-2">
+                                    <Link to="/bezwaar-maken" className="text-blue-700 hover:underline">
+                                        Naar pagina Bezwaar maken
+                                    </Link>
+                                </div>
+                            </div>
+                        </DropdownSection>
                     </div>
                 </div>
             ),
@@ -163,25 +173,22 @@ function WMOHelp() {
     ];
 
     return (
-        <main className="min-h-screen">
-            <section className="bg-blue-50 border-b border-gray-300">
-                <div className="mx-auto max-w-3xl px-6 py-12">
-                    <div className="text-center">
-                        <h1 className="text-5xl font-bold text-gray-900 mb-2">
-                            WMO
-                        </h1>
-                        <h2 className="text-2xl text-gray-900 font-medium mb-6">
-                            Wet maatschappelijke ondersteuning
-                        </h2>
-                        <p className="text-gray-700 text-center max-w-2xl mx-auto">
-                            Heeft u door ziekte, een handicap of ouderdom moeite nodig bij uw dagelijks leven? Zoals
-                            hulp bij het huishouden of vervoer? Of heeft u een voorziening nodig, zoals een traplift in
-                            huis? De gemeente kan u daarbij helpen via de Wmo (Wet maatschappelijke ondersteuning).
-                        </p>
-                    </div>
-                </div>
-            </section>
+        <main className="px-4 sm:px-6 py-6 sm:py-10">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-2xl font-bold mb-6">WMO - Veelgestelde vragen en informatie</h1>
 
+                <div className="space-y-4">
+                    {accordionItems.map((it, idx) => (
+                        <AccordionItem
+                            key={idx}
+                            title={it.title}
+                            content={it.content}
+                            isOpen={openIndex === idx}
+                            onToggle={() => handleToggle(idx)}
+                        />
+                    ))}
+                </div>
+            </div>
         </main>
     );
 }

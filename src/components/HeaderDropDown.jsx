@@ -1,5 +1,3 @@
-// javascript
-// src/components/HeaderDropDown.jsx
 import {useState} from "react";
 import {Link} from "react-router";
 

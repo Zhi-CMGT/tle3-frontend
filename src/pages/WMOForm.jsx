@@ -1,4 +1,3 @@
-// javascript
 import React, {useEffect, useState} from "react";
 import {getAuthHeaders} from '../lib/auth.js';
 import {useAuth} from '../contexts/AuthContext.jsx';
