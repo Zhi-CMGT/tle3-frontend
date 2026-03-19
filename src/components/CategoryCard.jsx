@@ -1,6 +1,21 @@
 import React from "react";
 import {useNavigate} from "react-router";
 
+import aanvragenImage from "../assets/aanvragen-image.jpg";
+import gezondheidImage from "../assets/gezondheid-en-vrijetijd-image.jpg";
+import levenImage from "../assets/leven-image.jpg";
+import omgevingImage from "../assets/omgeving-image.jpg";
+import werkImage from "../assets/werk-en-inkomen-image.jpg";
+import wonenImage from "../assets/wonen-image.jpg";
+
+const categoryImages = {
+    "aanvragen": aanvragenImage,
+    "gezondheid en vrijetijd": gezondheidImage,
+    "leven": levenImage,
+    "omgeving": omgevingImage,
+    "werk en inkomen": werkImage,
+    "wonen": wonenImage,
+}
 const getItemRoute = (item, categorySlug) => {
     const slugMap = {
         "wmo": "/WMO-help",
@@ -18,6 +33,10 @@ const getItemRoute = (item, categorySlug) => {
 const CategoryCard = ({category, items}) => {
     const navigate = useNavigate();
     const displayItems = items.slice(0, 3);
+
+    const imageSource = category.image
+        || categoryImages[category.slug]
+        || categoryImages[category.name?.toLowerCase()];
 
     return (
         <div
@@ -54,9 +73,9 @@ const CategoryCard = ({category, items}) => {
             </div>
 
             <div className="h-36 overflow-hidden bg-blue-50 mt-auto">
-                {category.image ? (
+                {imageSource ? (
                     <img
-                        src={category.image}
+                        src={imageSource}
                         alt={category.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
