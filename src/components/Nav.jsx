@@ -14,10 +14,10 @@ function Nav() {
     };
 
     return (
-        <nav className="bg-white border-b shadow-sm relative z-20" aria-label="Hoofdnavigatie">
+        <nav className="bg-white border-b shadow-sm relative z-20 overflow-x-hidden" aria-label="Hoofdnavigatie">
 
             {/* 🔹 MOBILE LAYOUT */}
-            <div className="md:hidden container mx-auto px-4 py-4 flex flex-col gap-4">
+            <div className="lg:hidden container mx-auto px-4 py-4 flex flex-col gap-4">
 
                 {/* Logo */}
                 <div className="flex justify-center">
@@ -59,7 +59,6 @@ function Nav() {
                         )}
                     </li>
 
-                    {/* 🔹 ENIGE logout knop */}
                     {isAuthenticated && (
                         <li>
                             <button
@@ -73,11 +72,12 @@ function Nav() {
                 </ul>
 
                 {/* Search + Profile */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
 
                     <HeaderDropdown/>
 
-                    <form role="search" className="flex items-center bg-gray-100 rounded-full px-3 py-2 flex-1">
+                    <form role="search"
+                          className="flex items-center bg-gray-100 rounded-full px-3 py-2 flex-1 min-w-[150px]">
                         <label htmlFor="nav-search" className="sr-only">Zoeken</label>
                         <input
                             id="nav-search"
@@ -120,17 +120,18 @@ function Nav() {
                 </div>
             </div>
 
-            <div className="hidden md:flex container mx-auto items-center justify-between px-6 py-4">
+            {/* 🔹 DESKTOP LAYOUT */}
+            <div className="hidden lg:flex flex-wrap container mx-auto items-center justify-between px-6 py-4 gap-y-4">
 
                 {/* Left */}
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-6 flex-wrap">
                     <img
                         src="/images/ZuidplasLogo.png"
                         alt="Logo van gemeente Zuidplas"
                         className="h-16"
                     />
 
-                    <div className="flex gap-6 text-gray-800 items-center">
+                    <div className="flex gap-4 text-gray-800 items-center flex-wrap">
                         <Link to="/" className="hover:text-blue-700">
                             Home
                         </Link>
@@ -150,19 +151,18 @@ function Nav() {
                 </div>
 
                 {/* Right */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 flex-wrap justify-end">
 
                     <HeaderDropdown/>
 
-                    <form role="search" className="flex items-center bg-gray-100 rounded-full px-4 py-2">
-                        <input className="bg-transparent outline-none w-32"/>
+                    <form role="search" className="flex items-center bg-gray-100 rounded-full px-4 py-2 min-w-[150px]">
+                        <input className="bg-transparent outline-none w-full"/>
                     </form>
 
                     <Link to="/Persoonlijke-pagina">
                         <div className="bg-blue-800 p-2 rounded-lg text-white">👤</div>
                     </Link>
 
-                    {/* 🔹 DEZELFDE ENIGE logout knop */}
                     {isAuthenticated && (
                         <button
                             onClick={handleLogout}

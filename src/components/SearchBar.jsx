@@ -101,6 +101,7 @@ const SearchBar = ({allItems}) => {
                         className="flex-1 px-4 py-3 sm:py-4 text-gray-800 text-sm sm:text-base outline-none bg-transparent placeholder-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
                         aria-expanded={open}
                         aria-controls="search-suggestions"
+                        role="combobox"
                     />
 
                     {/* Button */}
