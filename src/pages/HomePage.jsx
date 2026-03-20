@@ -179,13 +179,17 @@ const HomePage = () => {
             const normalizedItems = matchingItems.map(item => ({
                 id: item._id || item.id,
                 name: item.title || item.name || "Naamloos",
-                slug: item.slug || item._id || item.id || (item.title || item.name || "").toLowerCase().replace(/\s+/g, "-"),
+                slug: item.slug
+                    ? item.slug.replace(/[^a-zA-Z0-9-_]/g, "-")
+                    : (item._id || item.id || (item.title || item.name || "Naamloos"))
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-_]/g, "-"),
             }));
 
             const subCats = (cat.subcategories || []).map(sub => ({
                 id: sub.id || `sub-${sub.slug}`,
                 name: sub.name,
-                slug: sub.slug,
+                slug: sub.slug ? sub.slug.replace(/[^a-zA-Z0-9-_]/g, "-") : sub.name.toLowerCase().replace(/[^a-z0-9-_]/g, "-"),
             }));
 
             return {...cat, items: [...normalizedItems, ...subCats]};
@@ -198,7 +202,8 @@ const HomePage = () => {
             all.push({
                 id: cat.id,
                 name: cat.name,
-                slug: cat.slug || cat.name.toLowerCase().replace(/\s+/g, "-"),
+                // Safe slug voor URL
+                slug: encodeURIComponent(cat.slug || cat.name.toLowerCase().replace(/\s+/g, "-")),
                 category: "Categorie",
                 categorySlug: "categorie",
                 isCategory: true
@@ -207,7 +212,8 @@ const HomePage = () => {
                 all.push({
                     ...item,
                     category: cat.name,
-                    categorySlug: cat.slug || cat.name.toLowerCase().replace(/\s+/g, "-"),
+                    categorySlug: encodeURIComponent(cat.slug || cat.name.toLowerCase().replace(/\s+/g, "-")),
+                    slug: encodeURIComponent(item.slug), // safe
                     isCategory: false
                 });
             });
